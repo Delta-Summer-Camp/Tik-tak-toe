@@ -1,4 +1,13 @@
 p {
 	text-align: center;
-	font-size: 200px;
+	font-size: 100px;
+}
+
+.colorized {
+	color: darkcyan;
+	background-color: yellowgreen;
+}
+
+#changeable {
+	border: darkblue 1px solid;
 }
