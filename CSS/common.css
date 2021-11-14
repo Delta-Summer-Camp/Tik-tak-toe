@@ -1,13 +1,32 @@
-p {
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+body {
+	width: 1200px;
+	padding-left: 100px;
+}
+h1 {
+	width: 450px;
 	text-align: center;
-	font-size: 100px;
+	margin: 2em 0;
 }
-
-.colorized {
-	color: darkcyan;
-	background-color: yellowgreen;
-}
-
-#changeable {
+.game_board {
+	width: 450px;
+	height: 450px;
 	border: darkblue 1px solid;
+	background-image: url("../IMG/paper.jpg");
+}
+.game_row {
+	display: flex;
+	height: 150px;
+	width: 100%;
+	border: darkred 1px solid;
+}
+.game_cell {
+	height: 100%;
+	width: 150px;
+	border: darkcyan 1px solid;
+	cursor: pointer;
 }
