@@ -15,18 +15,16 @@ h1 {
 .game_board {
 	width: 450px;
 	height: 450px;
-	border: darkblue 1px solid;
 	background-image: url("../IMG/paper.jpg");
 }
 .game_row {
 	display: flex;
 	height: 150px;
 	width: 100%;
-	border: darkred 1px solid;
 }
 .game_cell {
 	height: 100%;
 	width: 150px;
-	border: darkcyan 1px solid;
+	border: darkblue 2px solid;
 	cursor: pointer;
 }
