@@ -1,4 +1,5 @@
-let cellStatus = 0;
+const gameSize = 3;
+const cells = [[0,0,0],[0,0,0],[0,0,0]];
 
 window.onload = function() {
 
@@ -6,14 +7,18 @@ window.onload = function() {
 }
 
 function newGame() {
-	const cell_00 = document.getElementById("cell-00");
-	cell_00.onclick = function() {
-		if (cellStatus === 0 || cellStatus === -1) {
-			cell_00.style.backgroundImage = "url('./IMG/x.gif')";
-			cellStatus = 1;
-		} else {
-			cell_00.style.backgroundImage = "url('./IMG/o.gif')";
-			cellStatus = -1;			
+	for(let i = 0; i < gameSize; i++) {
+		for(let j = 0; j < gameSize; j++) {
+			const cell = document.getElementById("cell-" + i + j);
+			cell.onclick = function() {
+				if (cells[i][j] === 0 || cells[i][j] === -1) {
+					cell.style.backgroundImage = "url('./IMG/x.gif')";
+					cells[i][j] = 1;
+				} else {
+					cell.style.backgroundImage = "url('./IMG/o.gif')";
+					cells[i][j] = -1;			
+				}
+			}
 		}
 	}
 }
