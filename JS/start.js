@@ -37,11 +37,12 @@ function storeInDatabase(path, data) {
 }
 
 function newGame() {
+
+	currentPlayer = +1;
+
 	for(let i = 0; i < gameSize; i++) {
 		for(let j = 0; j < gameSize; j++) {
-			const cell = document.getElementById("cell-" + i + j);
 			setClickListener(i, j);
-
 			cells[i][j] = 0;
 		}
 	}
@@ -51,8 +52,7 @@ function newGame() {
 		cell.onclick = function() {
 			if (cells[i][j] === 0) {
 				cells[i][j] = currentPlayer;
-				currentPlayer *= -1;
-				
+				currentPlayer *= -1;				
 				storeInDatabase('game/cells', cells);
 			}
 		}
@@ -61,22 +61,33 @@ function newGame() {
 	const button = document.getElementById("newGame");
 	button.onclick = newGame;
 
-	currentPlayer = +1;
-
 	storeInDatabase('game/cells', cells);
 
+	addDatabaseListener();
 }
 
-/*
-				if (cells[i][j] === 0) {
-					if (currentPlayer === +1) {
+function addDatabaseListener() {
+	const db = getDatabase();
+	const dbRef = ref(db);
+	const gameRef = child(dbRef, 'game/cells');
+	onValue(gameRef, function(snapshot) {
+		const cells = snapshot.val();
+		for(let i = 0; i < gameSize; i++) {
+			for(let j = 0; j < gameSize; j++) {
+				const cell = document.getElementById("cell-" + i + j);
+				switch (cells[i][j]) {
+					case 0:
+						cell.style.backgroundImage = "none";
+						break;
+					case +1:
 						cell.style.backgroundImage = "url('./IMG/x.gif')";
-						cells[i][j] = 1;
-						currentPlayer = -1;
-					} else {
+						break;
+					case -1:
 						cell.style.backgroundImage = "url('./IMG/o.gif')";
-						cells[i][j] = -1;
-						currentPlayer = +1;						
-					}
+						break;			
 				}
-*/
+
+			}
+		}
+	});
+}
