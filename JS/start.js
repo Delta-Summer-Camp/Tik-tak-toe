@@ -1,16 +1,18 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
 import { getAuth, signInAnonymously} from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, child, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
 const gameSize = 3;
-const cells = [[0,0,0],[0,0,0],[0,0,0]]; // Матрица игры
-let currentPlayer = +1;
+let cells; // Матрица игры
+let currentPlayer;
+let gameOwner;
 let dbRef;
 let myUID;
+let myTeam = 0;
 
 window.onload = function() {
 	initBase()
-		.then(newGame);
+		.then(startGame);
 }
 
 function initBase() {
@@ -52,17 +54,17 @@ function storeInDatabase(path, data) {
 	set(gameRef, data);
 }
 
-function newGame() {
+function startGame() {
 
-	currentPlayer = +1;
+	// ToDo: currentPlayer = +1;
 
 	for(let i = 0; i < gameSize; i++) {
 		for(let j = 0; j < gameSize; j++) {
 			setClickListener(i, j);
-			cells[i][j] = 0;
 		}
 	}
 
+	// ToDo: определять текущий ход
 	function setClickListener(i, j) {
 		const cell = document.getElementById("cell-" + i + j);
 		cell.onclick = function() {
@@ -77,22 +79,13 @@ function newGame() {
 	const button = document.getElementById("newGame");
 	button.onclick = newGame;
 
-	const gameData = {
-		owner: myUID,
-		cells: cells
-	}
-
-	storeInDatabase('game', gameData);
-
-	addDatabaseListener();
+	addDatabaseListeners();
 }
 
-function addDatabaseListener() {
-	const db = getDatabase();
-	const dbRef = ref(db);
+function addDatabaseListeners() {
 	const gameRef = child(dbRef, 'game/cells');
 	onValue(gameRef, function(snapshot) {
-		const cells = snapshot.val();
+		cells = snapshot.val();
 		for(let i = 0; i < gameSize; i++) {
 			for(let j = 0; j < gameSize; j++) {
 				const cell = document.getElementById("cell-" + i + j);
@@ -111,4 +104,28 @@ function addDatabaseListener() {
 			}
 		}
 	});
+
+	const currentPlayerRef = child(dbRef, 'game/currentPlayer');
+	onValue(currentPlayerRef, function(snapshot) {
+		currentPlayer = snapshot.val();
+	})
+
+	const ownerRef = child(dbRef, 'game/owner');
+	onValue(ownerRef, function(snapshot) {
+		gameOwner = snapshot.val();
+		if (gameOwner === myUID) {
+			myTeam = +1;
+		}
+	})
+}
+
+function newGame() {
+
+	const gameData = {
+		owner: myUID,
+		currentPlayer: myUID,
+		cells: [[0,0,0],[0,0,0],[0,0,0]]
+	}
+
+	storeInDatabase('game', gameData);
 }
