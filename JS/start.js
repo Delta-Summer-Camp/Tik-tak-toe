@@ -5,10 +5,11 @@ import { getDatabase, ref, set, onValue, child, get } from "https://www.gstatic.
 const gameSize = 3;
 let cells; // Матрица игры
 let currentPlayer;
+let coPlayer;
 let gameOwner;
 let dbRef;
 let myUID;
-let myTeam = 0;
+let myTeam = 0; // Guest
 
 window.onload = function() {
 	initBase()
@@ -68,10 +69,20 @@ function startGame() {
 	function setClickListener(i, j) {
 		const cell = document.getElementById("cell-" + i + j);
 		cell.onclick = function() {
-			if (cells[i][j] === 0) {
-				cells[i][j] = currentPlayer;
-				currentPlayer *= -1;				
-				storeInDatabase('game/cells', cells);
+			if (myTeam !== 0 && currentPlayer === myUID) {
+				if (cells[i][j] === 0) {
+					cells[i][j] = myTeam;
+					let nextPlayer;
+					if (myTeam === +1) {
+						nextPlayer = coPlayer;
+						document.getElementById('current').innerText = "Ход ноликов";
+					} else {
+						nextPlayer = gameOwner;
+						document.getElementById('current').innerText = "Ход крестиков";
+					}
+					storeInDatabase('game/cells', cells);
+					storeInDatabase('game/currentPlayer', nextPlayer);
+				}
 			}
 		}
 	}
@@ -115,6 +126,19 @@ function addDatabaseListeners() {
 		gameOwner = snapshot.val();
 		if (gameOwner === myUID) {
 			myTeam = +1;
+			document.getElementById('team').innerText = "Крестики";
+		}
+	})
+
+	const coPlayerRef = child(dbRef, 'game/coPlayer');
+	onValue(coPlayerRef, function(snapshot) {
+		coPlayer = snapshot.val();
+		if (coPlayer === myUID) {
+			myTeam = -1;
+			document.getElementById('team').innerText = "Нолики";
+		}
+		else if (coPlayer === null) {
+			storeInDatabase('game/coPlayer', myUID);
 		}
 	})
 }
