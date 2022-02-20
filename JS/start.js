@@ -1,4 +1,4 @@
-﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
 import { getAuth, signInAnonymously} from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, child, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
@@ -116,6 +116,12 @@ function addDatabaseListeners() {
 		}
 	});
 
+	const stateRef = child(dbRef, 'game/state');
+	onValue(stateRef, function(snapshot) {
+		// ToDo
+	})
+
+/*
 	const currentPlayerRef = child(dbRef, 'game/currentPlayer');
 	onValue(currentPlayerRef, function(snapshot) {
 		currentPlayer = snapshot.val();
@@ -132,7 +138,7 @@ function addDatabaseListeners() {
 		gameOwner = snapshot.val();
 		if (gameOwner === myUID) {
 			myTeam = +1;
-			document.getElementById('team').innerText = "Крестики";
+			document.getElementById('team').innerText = "крестики";
 		}
 	})
 
@@ -141,12 +147,13 @@ function addDatabaseListeners() {
 		coPlayer = snapshot.val();
 		if (coPlayer === myUID) {
 			myTeam = -1;
-			document.getElementById('team').innerText = "Нолики";
+			document.getElementById('team').innerText = "нолики";
 		}
 		else if (coPlayer === null) {
 			storeInDatabase('game/coPlayer', myUID);
 		}
 	})
+	*/
 }
 
 function newGame() {
@@ -154,7 +161,12 @@ function newGame() {
 	const gameData = {
 		owner: myUID,
 		currentPlayer: myUID,
-		cells: [[0,0,0],[0,0,0],[0,0,0]]
+		cells: [[0,0,0],[0,0,0],[0,0,0]],
+		state: {
+			owner: myUID,
+			currentPlayer: myUID,
+			coPlayer: null
+		}
 	}
 
 	storeInDatabase('game', gameData);
