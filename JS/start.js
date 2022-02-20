@@ -75,10 +75,10 @@ function startGame() {
 					let nextPlayer;
 					if (myTeam === +1) {
 						nextPlayer = coPlayer;
-						document.getElementById('current').innerText = "Ход ноликов";
+						// document.getElementById('current').innerText = "Ход ноликов";
 					} else {
 						nextPlayer = gameOwner;
-						document.getElementById('current').innerText = "Ход крестиков";
+						// document.getElementById('current').innerText = "Ход крестиков";
 					}
 					storeInDatabase('game/cells', cells);
 					storeInDatabase('game/currentPlayer', nextPlayer);
@@ -119,6 +119,12 @@ function addDatabaseListeners() {
 	const currentPlayerRef = child(dbRef, 'game/currentPlayer');
 	onValue(currentPlayerRef, function(snapshot) {
 		currentPlayer = snapshot.val();
+		if (currentPlayer === gameOwner) {
+			document.getElementById("current").innerText = "крестиков";
+		}
+		else if (currentPlayer === coPlayer) {
+			document.getElementById("current").innerText = "ноликов";			
+		}
 	})
 
 	const ownerRef = child(dbRef, 'game/owner');
