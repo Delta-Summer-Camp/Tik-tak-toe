@@ -1,3 +1,8 @@
+/*
+	Учебный проект игры Tik-tak-toe онлайн кружков физико-математической школы "Дельта"
+*/
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
 import { getAuth, signInAnonymously} from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, child, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
@@ -55,17 +60,17 @@ function storeInDatabase(path, data) {
 	set(gameRef, data);
 }
 
+// Запуск игры: программа при запуске не знает, в каком состоянии находится игра
 function startGame() {
 
-	// ToDo: currentPlayer = +1;
-
+	// Расставляем на каждую клетку обработчики клика мыши
 	for(let i = 0; i < gameSize; i++) {
 		for(let j = 0; j < gameSize; j++) {
 			setClickListener(i, j);
 		}
 	}
 
-	// ToDo: определять текущий ход
+	// Обработчик клика мышки
 	function setClickListener(i, j) {
 		const cell = document.getElementById("cell-" + i + j);
 		cell.onclick = function() {
@@ -81,19 +86,25 @@ function startGame() {
 						// document.getElementById('current').innerText = "Ход крестиков";
 					}
 					storeInDatabase('game/cells', cells);
-					storeInDatabase('game/currentPlayer', nextPlayer);
+					storeInDatabase('game/state/currentPlayer', nextPlayer);
 				}
 			}
 		}
 	}
 
+	// Кнопка "Новая игра"
 	const button = document.getElementById("newGame");
 	button.onclick = newGame;
 
+	// Добавляем обработчики событий в базе Firebase
 	addDatabaseListeners();
 }
 
+// Обработка событий в базе Firebase
 function addDatabaseListeners() {
+
+	// Обработка изменений матрицы игры
+	// ToDo: тут можно следить, не выиграл ли текущий ход
 	const gameRef = child(dbRef, 'game/cells');
 	onValue(gameRef, function(snapshot) {
 		cells = snapshot.val();
@@ -116,56 +127,60 @@ function addDatabaseListeners() {
 		}
 	});
 
+	// Обработка изменений состояния игры
 	const stateRef = child(dbRef, 'game/state');
 	onValue(stateRef, function(snapshot) {
-		// ToDo
-	})
+		const state = snapshot.val();
 
-/*
-	const currentPlayerRef = child(dbRef, 'game/currentPlayer');
-	onValue(currentPlayerRef, function(snapshot) {
-		currentPlayer = snapshot.val();
-		if (currentPlayer === gameOwner) {
-			document.getElementById("current").innerText = "крестиков";
+		// gameOwner
+		if (gameOwner !== state.gameOwner) {
+			gameOwner = state.gameOwner;
+			if (gameOwner === myUID) {
+				myTeam = +1;
+				document.getElementById('team').innerText = "крестики";
+			}			
 		}
-		else if (currentPlayer === coPlayer) {
-			document.getElementById("current").innerText = "ноликов";			
-		}
-	})
 
-	const ownerRef = child(dbRef, 'game/owner');
-	onValue(ownerRef, function(snapshot) {
-		gameOwner = snapshot.val();
-		if (gameOwner === myUID) {
-			myTeam = +1;
-			document.getElementById('team').innerText = "крестики";
-		}
-	})
+		// coPlayer
+		if (coPlayer !== state.coPlayer) {
+			coPlayer = state.coPlayer;
+			if (coPlayer === myUID) {
+				myTeam = -1;
+				document.getElementById('team').innerText = "нолики";
+			}
 
-	const coPlayerRef = child(dbRef, 'game/coPlayer');
-	onValue(coPlayerRef, function(snapshot) {
-		coPlayer = snapshot.val();
-		if (coPlayer === myUID) {
-			myTeam = -1;
-			document.getElementById('team').innerText = "нолики";
+			// ToDo: сейчас алгоритм такой - если ты подключился и видишь, что за ноликов никто не играет
+			// - сразу начинаешь играть "ноликами". Возможно имеет смысл спрашивать, а хочешь ли ты играть?
+			else if (myTeam === 0 && coPlayer === 0) {
+				storeInDatabase('game/state/coPlayer', myUID);
+			}			
 		}
-		else if (coPlayer === null) {
-			storeInDatabase('game/coPlayer', myUID);
+
+		// currentPlayer
+		if (currentPlayer !== state.currentPlayer) {
+			currentPlayer = state.currentPlayer;
+			if (currentPlayer === gameOwner) {
+				document.getElementById("current").innerText = "крестиков";
+			}
+			else if (currentPlayer === coPlayer) {
+				document.getElementById("current").innerText = "ноликов";			
+			}
+
 		}
+		
 	})
-	*/
 }
 
+// "Обнуление игры" - кто нажал, тот "крестики"
+// ToDo: возможно имеет смысл спрашивать, не случайно ли мы нажали на сброс игры
 function newGame() {
 
 	const gameData = {
-		owner: myUID,
-		currentPlayer: myUID,
 		cells: [[0,0,0],[0,0,0],[0,0,0]],
 		state: {
-			owner: myUID,
+			gameOwner: myUID,
 			currentPlayer: myUID,
-			coPlayer: null
+			coPlayer: 0
 		}
 	}
 
